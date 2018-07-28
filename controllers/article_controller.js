@@ -9,9 +9,9 @@ var router = express.Router();
 
 var db = require("../models");
 
-router.get("/", function(req, res) {
-    // send us to the next get function instead.
-    res.render("index");
-  });
+// router.get("/", function(req, res) {
+//     // send us to the next get function instead.
+//     res.render("index");
+//   });
 
 module.exports = router;

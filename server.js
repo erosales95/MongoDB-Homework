@@ -36,6 +36,15 @@ app.set("view engine", "handlebars");
 var routes = require("./controllers/article_controller");
 
 app.use(routes);
+app.get("/", function(req, res) {
+    db.Article.find({"saved": false}, function(error, data) {
+      var hbsObject = {
+        article: data
+      };
+      console.log(hbsObject);
+      res.render("index", hbsObject);
+    });
+  });
 
 app.get("/scrape", function (req, res) {
     console.log("*We got into our /scrape!!*")
@@ -46,17 +55,20 @@ app.get("/scrape", function (req, res) {
         var $ = cheerio.load(response.data);
 
         // Now, we grab every h2 within an article tag, and do the following:
-        $(".trb_outfit_group_list_item_body h3").each(function (i, element) {
+        $(".trb_outfit_group_list_item_body").each(function (i, element) {
             // Save an empty result object
             var result = {};
 
             // Add the text and href of every link, and save them as properties of the result object
             result.title = $(this)
-                .children("a")
+                .children().children("a")
                 .text();
             result.link = $(this)
-                .children("a")
+                .children().children("a")
                 .attr("href");
+            result.summary = $(this)
+                .children("p")
+                .text();
 
             // Create a new Article using the `result` object built from scraping
             db.Article.create(result)
@@ -74,10 +86,6 @@ app.get("/scrape", function (req, res) {
         res.send("Scrape Complete");
     });
 });
-// app.get("/", function(req, res) {
-//     // send us to the next get function instead.
-//     res.redirect("/articles");
-//   });
 
 // Route for getting all Articles from the db
 app.get("/articles", function (req, res) {
@@ -103,6 +111,25 @@ app.get("/articles/:id", function (req, res) {
             res.json(err)
         })
 });
+
+
+app.post("/articles/:id", function(req, res) {
+    // save the new note that gets posted to the Notes collection
+    // then find an article from the req.params.id
+    // and update it's "note" property with the _id of the new note
+  
+    db.Note.create(req.body)
+    .then(function(dbNote){
+      return db.Article.findOneAndUpdate({_id: req.params.id}, {note: dbNote._id}, {new: true})
+    })
+    .then(function(dbArticle){
+      console.log("note created!!!!!")
+      res.json(dbArticle)
+    })
+    .catch(function(err){
+      res.json(err)
+    })
+  });
 
 
 var PORT = 8080;
