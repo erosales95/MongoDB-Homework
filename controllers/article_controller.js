@@ -9,21 +9,9 @@ var router = express.Router();
 
 var db = require("../models");
 
-// get route -> index
-router.get("/", function (req, res) {
+router.get("/", function(req, res) {
     // send us to the next get function instead.
-    //   res.redirect("/scrape");
-    db.Article.findOne({ _id: req.params.id })
-        .populate("note")
-        .then(function (dbArticle) {
-            res.json(dbArticle)
-            console.log("Found our articleee!!!")
-        })
-        .catch(function (err) {
-            res.json(err)
-        })
-});
-var db = require("../models");
-
+    res.render("index");
+  });
 
 module.exports = router;

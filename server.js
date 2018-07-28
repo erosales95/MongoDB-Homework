@@ -37,29 +37,14 @@ var routes = require("./controllers/article_controller");
 
 app.use(routes);
 
-app.get("/", function (req, res) {
-    // send us to the next get function instead.
-    //   res.redirect("/scrape");
-    db.Article.findOne({ _id: req.params.id })
-        .populate("note")
-        .then(function (dbArticle) {
-            res.json(dbArticle)
-            console.log("Found our articleee!!!")
-        })
-        .catch(function (err) {
-            res.json(err)
-        })
-});
-
-
 app.get("/scrape", function (req, res) {
     console.log("*We got into our /scrape!!*")
-    
+
     // First, we grab the body of the html with request
     axios.get("http://www.chicagotribune.com/news/trending/").then(function (response) {
         // Then, we load that into cheerio and save it to $ for a shorthand selector
         var $ = cheerio.load(response.data);
-        
+
         // Now, we grab every h2 within an article tag, and do the following:
         $(".trb_outfit_group_list_item_body h3").each(function (i, element) {
             // Save an empty result object
@@ -89,12 +74,39 @@ app.get("/scrape", function (req, res) {
         res.send("Scrape Complete");
     });
 });
+// app.get("/", function(req, res) {
+//     // send us to the next get function instead.
+//     res.redirect("/articles");
+//   });
 
+// Route for getting all Articles from the db
+app.get("/articles", function (req, res) {
+    // TODO: Finish the route so it grabs all of the articles
+    db.Article.find({})
+        .then(function (dbArticles) {
+            res.json(dbArticles)
+        })
+        .catch(function (err) {
+            res.json(err)
+        })
+});
+
+app.get("/articles/:id", function (req, res) {
+    // send us to the next get function instead.
+    db.Article.findOne({ _id: req.params.id })
+        .populate("note")
+        .then(function (dbArticle) {
+            res.json(dbArticle)
+            console.log("Found our articleee!!!")
+        })
+        .catch(function (err) {
+            res.json(err)
+        })
+});
 
 
 var PORT = 8080;
 // Start the server
-app.listen(PORT, function() {
+app.listen(PORT, function () {
     console.log("App running on http://localhost:" + PORT + " !");
-  });
-  
+});
